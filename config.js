@@ -11,33 +11,42 @@ const getApiUrl = () => {
     return stored;
   }
 
-  // 2. Check window config
+  // 2. Check environment variable (Netlify inject này)
+  if (window.REACT_APP_BACKEND_URL) {
+    console.log('✓ Using API_URL from environment (REACT_APP_BACKEND_URL):', window.REACT_APP_BACKEND_URL);
+    return window.REACT_APP_BACKEND_URL;
+  }
+
+  // 3. Check window config
   if (window.API_CONFIG?.API_URL) {
     console.log('✓ Using API_URL from window.API_CONFIG:', window.API_CONFIG.API_URL);
     return window.API_CONFIG.API_URL;
   }
 
-  // 3. Check environment variable window.BACKEND_URL
+  // 4. Check window.BACKEND_URL
   if (window.BACKEND_URL) {
     console.log('✓ Using API_URL from window.BACKEND_URL:', window.BACKEND_URL);
     return window.BACKEND_URL;
   }
 
-  // 4. Development - localhost
+  // 5. Development - localhost
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     console.log('✓ Using localhost backend');
     return 'http://localhost:3000';
   }
 
-  // 5. Production - try same domain first
+  // 6. Production fallback - same origin (not ideal)
+  console.warn('⚠️ REACT_APP_BACKEND_URL not set! Falling back to same origin.');
+  console.warn('⚠️ To fix: Set REACT_APP_BACKEND_URL in Netlify Environment Variables');
   const sameOrigin = window.location.origin;
-  console.log('ℹ️  Will try same origin first:', sameOrigin);
+  console.log('ℹ️  Using:', sameOrigin);
   return sameOrigin;
 };
 
 const API_URL = getApiUrl();
 
 console.log('🌐 API Configuration loaded');
+console.log('📍 Current Site:', window.location.href);
 console.log('📍 Hostname:', window.location.hostname);
 console.log('🔗 API URL:', API_URL);
 

@@ -2,17 +2,10 @@
   command = "echo 'Deploying frontend only'"
   publish = "."
 
-# Redirect API calls to backend server
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
-  status = 200
-
-# Static file routing - serve specific files
-[[redirects]]
-  from = "/admin-*"
-  to = "/admin-:splat"
-  status = 200
+# IMPORTANT: Set environment variable for backend URL
+# Set this in Netlify Dashboard → Site Settings → Environment Variables
+# Variable name: REACT_APP_BACKEND_URL or BACKEND_URL
+# Example value: https://poshkroom-backend.up.railway.app
 
 # Profile/detail pages - route to profile.html
 [[redirects]]
