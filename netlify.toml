@@ -8,6 +8,19 @@
   to = "/.netlify/functions/api/:splat"
   status = 200
 
+# Static file routing - serve specific files
+[[redirects]]
+  from = "/admin-*"
+  to = "/admin-:splat"
+  status = 200
+
+# Profile/detail pages - route to profile.html
+[[redirects]]
+  from = "/:slug"
+  to = "/profile.html"
+  status = 200
+  conditions = {role = ["none"]}
+  
 # Rewrite for SPA routing
 [[redirects]]
   from = "/*"
