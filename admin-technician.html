@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Kỹ Thuật Viên - Admin</title>
+    <script src="config.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar h1 {
+            font-size: 24px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 14px;
+            transition: opacity 0.3s;
+        }
+
+        .navbar a:hover {
+            opacity: 0.8;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h2 {
+            color: #333;
+            font-size: 28px;
+        }
+
+        .add-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .alert.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow-x: auto;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #ddd;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            color: #666;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .tech-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #eee;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-edit {
+            background-color: #ffc107;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background-color: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 20px auto;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 800px;
+            width: 90%;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-grid .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            display: none;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border: 2px dashed #ddd;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .file-input-label:hover {
+            background-color: #eee;
+        }
+
+        .preview-container {
+            margin-top: 15px;
+        }
+
+        .preview-item {
+            display: inline-block;
+            position: relative;
+            margin: 5px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .preview-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .preview-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .gallery-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        .btn-save {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-cancel {
+            padding: 10px 20px;
+            background-color: #ddd;
+            color: #333;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-cancel:hover {
+            background-color: #ccc;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Poshkroom Admin</h1>
+        <div class="user-info">
+            <span id="username">User</span>
+            <button class="logout-btn" onclick="logout()">Đăng Xuất</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="alertBox" class="alert"></div>
+
+        <div class="header">
+            <h2>Quản Lý Kỹ Thuật Viên</h2>
+            <button class="add-btn" onclick="openAddModal()">+ Thêm Kỹ Thuật Viên</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ảnh</th>
+                        <th>Tên</th>
+                        <th>Mô Tả Ngắn</th>
+                        <th>Link (Slug)</th>
+                        <th>Trạng Thái</th>
+                        <th>Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="technicianTable">
+                    <tr class="empty-state">
+                        <td colspan="6">Đang tải dữ liệu...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Thêm/Sửa Kỹ Thuật Viên -->
+    <div id="technicianModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalTitle">Thêm Kỹ Thuật Viên Mới</div>
+            <form id="technicianForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="techName">Tên Kỹ Thuật Viên: <span style="color: red;">*</span></label>
+                    <input type="text" id="techName" required>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="techSlug">Link ID (Slug): <span style="color: red;">*</span></label>
+                        <input type="text" id="techSlug" placeholder="vd: nguyen-van-a" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="techStatus">Trạng Thái:</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="techStatus" checked>
+                            <label for="techStatus" style="margin-bottom: 0;">Hiển thị</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group full">
+                    <label for="techShortDesc">Mô Tả Ngắn (1 dòng):</label>
+                    <input type="text" id="techShortDesc" placeholder="Mô tả ngắn gọn về kỹ thuật viên">
+                </div>
+
+                <div class="form-group full">
+                    <label for="techDesc">Mô Tả Chi Tiết:</label>
+                    <textarea id="techDesc" placeholder="Mô tả chi tiết..."></textarea>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Ảnh Đại Diện:</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="techAvatar" accept="image/*">
+                            <label class="file-input-label" for="techAvatar">Chọn ảnh đại diện</label>
+                        </div>
+                        <div id="avatarPreview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ảnh Bìa (Cover):</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="techCover" accept="image/*">
+                            <label class="file-input-label" for="techCover">Chọn ảnh bìa</label>
+                        </div>
+                        <div id="coverPreview"></div>
+                    </div>
+                </div>
+
+                <div class="form-group full">
+                    <label>Gallery (Nhiều Ảnh):</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="techGallery" multiple accept="image/*">
+                        <label class="file-input-label" for="techGallery">Chọn hoặc kéo thả ảnh</label>
+                    </div>
+                    <div class="gallery-preview" id="galleryPreview"></div>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Hủy</button>
+                    <button type="submit" class="btn-save">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentEditId = null;
+        let currentGallery = [];
+
+        // Check login
+        window.addEventListener('load', () => {
+            const user = localStorage.getItem('user');
+            if (!user) {
+                window.location.href = '/admin-login.html';
+                return;
+            }
+            const userData = JSON.parse(user);
+            document.getElementById('username').textContent = userData.username;
+            loadTechnicians();
+
+            // Setup event listeners
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Form submit
+            const form = document.getElementById('technicianForm');
+            if (form) {
+                form.addEventListener('submit', handleFormSubmit);
+            }
+
+            // File inputs
+            const avatarInput = document.getElementById('techAvatar');
+            if (avatarInput) {
+                avatarInput.addEventListener('change', (e) => {
+                    previewImage(e.target, 'avatarPreview', 100);
+                });
+            }
+
+            const coverInput = document.getElementById('techCover');
+            if (coverInput) {
+                coverInput.addEventListener('change', (e) => {
+                    previewImage(e.target, 'coverPreview', 200);
+                });
+            }
+
+            const galleryInput = document.getElementById('techGallery');
+            if (galleryInput) {
+                galleryInput.addEventListener('change', (e) => {
+                    previewMultiple(e.target);
+                });
+            }
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const formData = new FormData();
+            formData.append('name', document.getElementById('techName').value);
+            formData.append('slug', document.getElementById('techSlug').value);
+            formData.append('shortDescription', document.getElementById('techShortDesc').value);
+            formData.append('description', document.getElementById('techDesc').value);
+            formData.append('status', document.getElementById('techStatus').checked);
+            formData.append('oldGallery', JSON.stringify(currentGallery));
+
+            // Add files
+            const avatar = document.getElementById('techAvatar').files[0];
+            if (avatar) formData.append('avatar', avatar);
+
+            const cover = document.getElementById('techCover').files[0];
+            if (cover) formData.append('cover', cover);
+
+            Array.from(document.getElementById('techGallery').files).forEach(file => {
+                formData.append('gallery', file);
+            });
+
+            try {
+                let response;
+                if (currentEditId) {
+                    response = await fetch(`/api/technicians/${currentEditId}`, {
+                        method: 'PUT',
+                        body: formData
+                    });
+                } else {
+                    response = await fetch('/api/technicians', {
+                        method: 'POST',
+                        body: formData
+                    });
+                }
+
+                const result = await response.json();
+                if (response.ok) {
+                    showAlert(result.message, 'success');
+                    closeModal();
+                    loadTechnicians();
+                } else {
+                    showAlert(result.error, 'error');
+                }
+            } catch (err) {
+                showAlert('Lỗi: ' + err.message, 'error');
+            }
+        }
+
+        // Load technicians
+        async function loadTechnicians() {
+            try {
+                console.log('Loading technicians...');
+                const response = await fetch('/api/technicians');
+                const technicians = await response.json();
+                console.log('Technicians loaded:', technicians);
+                
+                const tbody = document.getElementById('technicianTable');
+                if (technicians.length === 0) {
+                    tbody.innerHTML = '<tr class="empty-state"><td colspan="6">Chưa có kỹ thuật viên nào</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = technicians.map(tech => `
+                    <tr>
+                        <td>
+                            <img src="${tech.avatar}" alt="${tech.name}" class="tech-avatar" onerror="this.src='/images/placeholder.jpg'">
+                        </td>
+                        <td><strong>${tech.name}</strong></td>
+                        <td>${tech.shortDescription || 'N/A'}</td>
+                        <td><code>${tech.slug}</code></td>
+                        <td>
+                            <span class="status-badge ${tech.status && !tech.deletedAt ? 'active' : 'inactive'}">
+                                ${tech.status && !tech.deletedAt ? 'Hiển thị' : 'Ẩn'}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-edit" onclick="openEditModal('${tech._id}')">Sửa</button>
+                                <button class="btn btn-delete" onclick="deleteTechnician('${tech._id}')">Xóa</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                showAlert('Lỗi tải danh sách: ' + err.message, 'error');
+            }
+        }
+
+        // Open add modal
+        function openAddModal() {
+            currentEditId = null;
+            currentGallery = [];
+            document.getElementById('modalTitle').textContent = 'Thêm Kỹ Thuật Viên Mới';
+            document.getElementById('technicianForm').reset();
+            document.getElementById('techStatus').checked = true;
+            document.getElementById('avatarPreview').innerHTML = '';
+            document.getElementById('coverPreview').innerHTML = '';
+            document.getElementById('galleryPreview').innerHTML = '';
+            document.getElementById('technicianModal').classList.add('show');
+        }
+
+        // Open edit modal
+        async function openEditModal(id) {
+            try {
+                if (!id) {
+                    showAlert('Lỗi: ID kỹ thuật viên không hợp lệ', 'error');
+                    return;
+                }
+
+                const url = `/api/technicians/${id}`;
+                console.log('Fetching technician from:', url);
+                
+                const response = await fetch(url);
+                console.log('Response status:', response.status);
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const tech = await response.json();
+                console.log('Technician data loaded:', tech);
+
+                // Reset form first to clear any previous data
+                document.getElementById('technicianForm').reset();
+                
+                currentEditId = id;
+                currentGallery = tech.gallery || [];
+                
+                document.getElementById('modalTitle').textContent = 'Sửa Kỹ Thuật Viên';
+                document.getElementById('techName').value = tech.name || '';
+                document.getElementById('techSlug').value = tech.slug || '';
+                document.getElementById('techShortDesc').value = tech.shortDescription || '';
+                document.getElementById('techDesc').value = tech.description || '';
+                document.getElementById('techStatus').checked = tech.status || false;
+
+                // Clear file input previews from previous sessions
+                document.getElementById('avatarPreview').innerHTML = '';
+                document.getElementById('coverPreview').innerHTML = '';
+                document.getElementById('galleryPreview').innerHTML = '';
+
+                // Preview avatar
+                if (tech.avatar) {
+                    document.getElementById('avatarPreview').innerHTML = `
+                        <div class="preview-container">
+                            <img src="${tech.avatar}" style="width: 100px; height: 100px; border-radius: 5px; object-fit: cover;" onerror="this.src='/images/placeholder.jpg'">
+                        </div>
+                    `;
+                }
+
+                // Preview cover
+                if (tech.cover) {
+                    document.getElementById('coverPreview').innerHTML = `
+                        <div class="preview-container">
+                            <img src="${tech.cover}" style="width: 100%; max-width: 200px; height: auto; border-radius: 5px;" onerror="this.src='/images/placeholder.jpg'">
+                        </div>
+                    `;
+                }
+
+                // Preview gallery
+                updateGalleryPreview();
+
+                document.getElementById('technicianModal').classList.add('show');
+            } catch (err) {
+                console.error('Error in openEditModal:', err);
+                showAlert('Lỗi tải dữ liệu: ' + err.message, 'error');
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('technicianModal').classList.remove('show');
+            currentEditId = null;
+            currentGallery = [];
+        }
+
+        function previewImage(input, containerId, maxWidth) {
+            const container = document.getElementById(containerId);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    container.innerHTML = `
+                        <div class="preview-container">
+                            <img src="${e.target.result}" style="max-width: ${maxWidth}px; height: auto; border-radius: 5px;">
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewMultiple(input) {
+            const container = document.getElementById('galleryPreview');
+            container.innerHTML = '';
+
+            if (input.files) {
+                Array.from(input.files).forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const preview = document.createElement('div');
+                        preview.className = 'preview-item';
+                        preview.innerHTML = `
+                            <img src="${e.target.result}">
+                            <button type="button" class="remove-btn" onclick="removeGalleryFile(${index})">×</button>
+                        `;
+                        container.appendChild(preview);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        function removeGalleryFile(index) {
+            const input = document.getElementById('techGallery');
+            const dt = new DataTransfer();
+            const files = input.files;
+
+            for (let i = 0; i < files.length; i++) {
+                if (i !== index) {
+                    dt.items.add(files[i]);
+                }
+            }
+
+            input.files = dt.files;
+            previewMultiple(input);
+        }
+
+        function updateGalleryPreview() {
+            const container = document.getElementById('galleryPreview');
+            container.innerHTML = currentGallery.map((img, index) => `
+                <div class="preview-item">
+                    <img src="${img}">
+                    <button type="button" class="remove-btn" onclick="removeFromGallery(${index})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function removeFromGallery(index) {
+            currentGallery.splice(index, 1);
+            updateGalleryPreview();
+        }
+
+        // Delete technician
+        async function deleteTechnician(id) {
+            if (!confirm('Bạn chắc chắn muốn xóa kỹ thuật viên này?')) return;
+
+            try {
+                const response = await fetch(`/api/technicians/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    showAlert(result.message, 'success');
+                    loadTechnicians();
+                } else {
+                    showAlert(result.error, 'error');
+                }
+            } catch (err) {
+                showAlert('Lỗi: ' + err.message, 'error');
+            }
+        }
+
+        // Show alert
+        function showAlert(message, type) {
+            const box = document.getElementById('alertBox');
+            box.textContent = message;
+            box.className = 'alert ' + type;
+            box.style.display = 'block';
+            setTimeout(() => {
+                box.style.display = 'none';
+            }, 5000);
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Bạn chắc chắn muốn đăng xuất?')) {
+                localStorage.removeItem('user');
+                window.location.href = '/admin-login.html';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('technicianModal');
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

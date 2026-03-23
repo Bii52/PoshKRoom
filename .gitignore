@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.local
+uploads/
+scraped_*.json
+npm-debug.log
+.DS_Store
+*.log
+dist/
+build/
+.netlify/

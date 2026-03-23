@@ -1,0 +1,15 @@
+[build]
+  command = "echo 'Deploying frontend only'"
+  publish = "."
+
+# Redirect API calls to backend server
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+# Rewrite for SPA routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

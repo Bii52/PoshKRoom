@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Quản Lý Nhân Viên</title>
+    <script src="config.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar h1 {
+            font-size: 24px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h2 {
+            color: #333;
+            font-size: 28px;
+        }
+
+        .add-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .alert.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #ddd;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            color: #666;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-edit {
+            background-color: #ffc107;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background-color: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: auto;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        .btn-save {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-cancel {
+            padding: 10px 20px;
+            background-color: #ddd;
+            color: #333;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-cancel:hover {
+            background-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Poshkroom Admin Dashboard</h1>
+        <div>
+            <a href="/admin-dashboard.html" style="opacity: 1; font-weight: bold; color: white; text-decoration: none; margin: 0 15px; font-size: 14px;">Dashboard</a>
+            <a href="/admin-technician.html" style="opacity: 0.8; color: white; text-decoration: none; margin: 0 15px; font-size: 14px;">Kỹ Thuật Viên</a>
+        </div>
+        <div class="user-info">
+            <span id="username">User</span>
+            <button class="logout-btn" onclick="logout()">Đăng Xuất</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="alertBox" class="alert"></div>
+
+        <div class="header">
+            <h2>Quản Lý Nhân Viên</h2>
+            <button class="add-btn" onclick="openAddModal()">+ Thêm Nhân Viên</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Tên</th>
+                        <th>Email</th>
+                        <th>Điện Thoại</th>
+                        <th>Chức Vụ</th>
+                        <th>Lương</th>
+                        <th>Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="employeeTable">
+                    <tr class="empty-state">
+                        <td colspan="7">Đang tải dữ liệu...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Thêm/Sửa Nhân Viên -->
+    <div id="employeeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalTitle">Thêm Nhân Viên Mới</div>
+            <form id="employeeForm">
+                <div class="form-group">
+                    <label for="empName">Tên Nhân Viên:</label>
+                    <input type="text" id="empName" required>
+                </div>
+                <div class="form-group">
+                    <label for="empEmail">Email:</label>
+                    <input type="email" id="empEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="empPhone">Điện Thoại:</label>
+                    <input type="text" id="empPhone" required>
+                </div>
+                <div class="form-group">
+                    <label for="empPosition">Chức Vụ:</label>
+                    <input type="text" id="empPosition" required>
+                </div>
+                <div class="form-group">
+                    <label for="empSalary">Lương:</label>
+                    <input type="number" id="empSalary" value="0">
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Hủy</button>
+                    <button type="submit" class="btn-save">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentEditId = null;
+
+        // Check login
+        window.addEventListener('load', () => {
+            const user = localStorage.getItem('user');
+            if (!user) {
+                window.location.href = '/admin-login.html';
+                return;
+            }
+            const userData = JSON.parse(user);
+            document.getElementById('username').textContent = userData.username;
+            loadEmployees();
+        });
+
+        // Load employees
+        async function loadEmployees() {
+            try {
+                const response = await fetch('/api/employees');
+                const employees = await response.json();
+                
+                const tbody = document.getElementById('employeeTable');
+                if (employees.length === 0) {
+                    tbody.innerHTML = '<tr class="empty-state"><td colspan="7">Chưa có nhân viên nào</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = employees.map((emp, index) => `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${emp.name}</td>
+                        <td>${emp.email}</td>
+                        <td>${emp.phone}</td>
+                        <td>${emp.position}</td>
+                        <td>${new Intl.NumberFormat('vi-VN').format(emp.salary)}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-edit" onclick="openEditModal('${emp._id}', '${emp.name}', '${emp.email}', '${emp.phone}', '${emp.position}', ${emp.salary})">Sửa</button>
+                                <button class="btn btn-delete" onclick="deleteEmployee('${emp._id}')">Xóa</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                showAlert('Lỗi tải danh sách: ' + err.message, 'error');
+            }
+        }
+
+        // Open add modal
+        function openAddModal() {
+            currentEditId = null;
+            document.getElementById('modalTitle').textContent = 'Thêm Nhân Viên Mới';
+            document.getElementById('employeeForm').reset();
+            document.getElementById('employeeModal').classList.add('show');
+        }
+
+        // Open edit modal
+        function openEditModal(id, name, email, phone, position, salary) {
+            currentEditId = id;
+            document.getElementById('modalTitle').textContent = 'Sửa Thông Tin Nhân Viên';
+            document.getElementById('empName').value = name;
+            document.getElementById('empEmail').value = email;
+            document.getElementById('empPhone').value = phone;
+            document.getElementById('empPosition').value = position;
+            document.getElementById('empSalary').value = salary;
+            document.getElementById('employeeModal').classList.add('show');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('employeeModal').classList.remove('show');
+            currentEditId = null;
+        }
+
+        // Handle form submit
+        document.getElementById('employeeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                name: document.getElementById('empName').value,
+                email: document.getElementById('empEmail').value,
+                phone: document.getElementById('empPhone').value,
+                position: document.getElementById('empPosition').value,
+                salary: parseFloat(document.getElementById('empSalary').value) || 0
+            };
+
+            try {
+                let response;
+                if (currentEditId) {
+                    response = await fetch(`/api/employees/${currentEditId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    response = await fetch('/api/employees', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                }
+
+                const result = await response.json();
+                if (response.ok) {
+                    showAlert(result.message, 'success');
+                    closeModal();
+                    loadEmployees();
+                } else {
+                    showAlert(result.error, 'error');
+                }
+            } catch (err) {
+                showAlert('Lỗi: ' + err.message, 'error');
+            }
+        });
+
+        // Delete employee
+        async function deleteEmployee(id) {
+            if (!confirm('Bạn chắc chắn muốn xóa nhân viên này?')) return;
+
+            try {
+                const response = await fetch(`/api/employees/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    showAlert(result.message, 'success');
+                    loadEmployees();
+                } else {
+                    showAlert(result.error, 'error');
+                }
+            } catch (err) {
+                showAlert('Lỗi: ' + err.message, 'error');
+            }
+        }
+
+        // Show alert
+        function showAlert(message, type) {
+            const box = document.getElementById('alertBox');
+            box.textContent = message;
+            box.className = 'alert ' + type;
+            box.style.display = 'block';
+            setTimeout(() => {
+                box.style.display = 'none';
+            }, 5000);
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Bạn chắc chắn muốn đăng xuất?')) {
+                localStorage.removeItem('user');
+                window.location.href = '/admin-login.html';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('employeeModal');
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
