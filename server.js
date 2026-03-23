@@ -324,12 +324,31 @@ app.put('/api/technicians/:id', upload.any(), async (req, res) => {
 
     const files = req.files || [];
     
-    // Start with body values or existing values
-    let avatar = bodyAvatar || technician.avatar;
-    let cover = bodyCover || technician.cover;
-    let gallery = bodyGallery ? (Array.isArray(bodyGallery) ? bodyGallery : [bodyGallery]) : (oldGallery ? JSON.parse(oldGallery) : technician.gallery || []);
+    // Xử lý avatar
+    let avatar = technician.avatar;  // Mặc định giữ avatar cũ
+    if (bodyAvatar) {
+      // Client gửi URL avatar cũ hoặc ảnh mới
+      avatar = bodyAvatar;
+    }
+    
+    // Xử lý cover
+    let cover = technician.cover;    // Mặc định giữ cover cũ
+    if (bodyCover) {
+      // Client gửi URL cover cũ hoặc ảnh mới
+      cover = bodyCover;
+    }
+    
+    // Xử lý gallery - giữ gallery cũ hoặc dùng oldGallery từ client
+    let gallery = oldGallery ? JSON.parse(oldGallery) : (technician.gallery || []);
+    if (bodyGallery) {
+      if (Array.isArray(bodyGallery)) {
+        gallery = bodyGallery;
+      } else if (typeof bodyGallery === 'string') {
+        gallery = [bodyGallery];
+      }
+    }
 
-    // Process uploaded files (override body values if files exist)
+    // Process uploaded files (override với file mới nếu có)
     files.forEach(file => {
       const fileUrl = `/uploads/${file.filename}`;
       if (file.fieldname === 'avatar') {
