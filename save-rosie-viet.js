@@ -3,45 +3,67 @@ const fs = require('fs');
 const path = require('path');
 
 const url = 'https://www.poshkroom.com/rosie-viet';
-const htmlFileName = 'rosie-viet-header.html';
-const cssFileName = 'rosie-viet-header.css';
 
 (async () => {
-  const browser = await puppeteer.launch({ headless: true });
-  const page = await browser.newPage();
-  await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
+  console.log('🚀 Khởi động browser...');
 
-  // 1. Lấy HTML của phần header
-  const headerHTML = await page.evaluate(() => {
-    const header = document.querySelector('header') || document.querySelector('nav');
-    return header ? header.outerHTML : '';
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
-  fs.writeFileSync(path.join(__dirname, htmlFileName), headerHTML);
-  console.log(`✓ HTML Header đã lưu: ${htmlFileName} (${Math.round(headerHTML.length / 1024)} KB)`);
+  try {
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1920, height: 1080 });
 
-  // 2. Lấy tất cả CSS áp dụng lên header
-  const headerCSS = await page.evaluate(() => {
-    const header = document.querySelector('header') || document.querySelector('nav');
-    if (!header) return '';
+    console.log('📥 Tải trang...');
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
-    let cssText = '';
-    for (const sheet of document.styleSheets) {
-      try {
-        for (const rule of sheet.cssRules) {
-          if (rule.cssText.includes(header.tagName.toLowerCase())) {
+    // Xóa tất cả thẻ <script>
+    await page.evaluate(() => {
+      const scripts = document.querySelectorAll('script');
+      scripts.forEach(s => s.remove());
+    });
+
+    // Lấy HTML sạch
+    console.log('💾 Lấy HTML...');
+    const html = await page.content();
+
+    // Lưu vào technicianDetailPage.js
+    const jsContent = `// Auto-generated HTML content
+export const technicianDetailPageHTML = \`
+${html.replace(/`/g, '\\`')}
+\`;
+`;
+    const jsPath = path.join(__dirname, 'technicianDetailPage.js');
+    fs.writeFileSync(jsPath, jsContent);
+    console.log(`✓ HTML đã lưu vào JS: ${jsPath} (${Math.round(html.length / 1024)} KB)`);
+
+    // Lấy toàn bộ CSS đã render
+    console.log('🎨 Lấy CSS...');
+    const allCss = await page.evaluate(() => {
+      let cssText = '';
+      for (const sheet of document.styleSheets) {
+        try {
+          for (const rule of sheet.cssRules) {
             cssText += rule.cssText + '\n';
           }
+        } catch (e) {
+          // Cross-origin CSS sẽ throw lỗi, bỏ qua
         }
-      } catch (e) {
-        // Cross-origin CSS sẽ bị lỗi, bỏ qua
       }
-    }
-    return cssText;
-  });
+      return cssText;
+    });
 
-  fs.writeFileSync(path.join(__dirname, cssFileName), headerCSS);
-  console.log(`✓ CSS Header đã lưu: ${cssFileName} (${Math.round(headerCSS.length / 1024)} KB)`);
+    // Lưu vào technicianDetailPage.css
+    const cssPath = path.join(__dirname, 'technicianDetailPage.css');
+    fs.writeFileSync(cssPath, allCss);
+    console.log(`✓ CSS đã lưu: ${cssPath} (${Math.round(allCss.length / 1024)} KB)`);
 
-  await browser.close();
+    console.log('\n✅ Hoàn tất! HTML + CSS đã xuất ra JS + CSS riêng.');
+  } catch (err) {
+    console.error('❌ Lỗi:', err.message);
+  } finally {
+    await browser.close();
+  }
 })();
