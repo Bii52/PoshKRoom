@@ -1,32 +1,45 @@
 /**
  * API Configuration
- * Sử dụng environment variable nếu có, nếu không sử dụng localhost
+ * Auto-detect backend URL từ environment
  */
 
-// Lấy API URL từ localStorage, window config, hoặc environment
 const getApiUrl = () => {
-  // 1. Check localStorage
+  // 1. Check localStorage (user can set manually)
   const stored = localStorage.getItem('API_URL');
-  if (stored) return stored;
+  if (stored) {
+    console.log('✓ Using API_URL from localStorage:', stored);
+    return stored;
+  }
 
   // 2. Check window config
-  if (window.API_CONFIG?.API_URL) return window.API_CONFIG.API_URL;
+  if (window.API_CONFIG?.API_URL) {
+    console.log('✓ Using API_URL from window.API_CONFIG:', window.API_CONFIG.API_URL);
+    return window.API_CONFIG.API_URL;
+  }
 
-  // 3. Check window variable
-  if (window.BACKEND_URL) return window.BACKEND_URL;
+  // 3. Check environment variable window.BACKEND_URL
+  if (window.BACKEND_URL) {
+    console.log('✓ Using API_URL from window.BACKEND_URL:', window.BACKEND_URL);
+    return window.BACKEND_URL;
+  }
 
-  // 4. Development vs Production
+  // 4. Development - localhost
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    console.log('✓ Using localhost backend');
     return 'http://localhost:3000';
   }
 
-  // 5. Production: try to use same domain
-  return window.location.origin;
+  // 5. Production - try same domain first
+  const sameOrigin = window.location.origin;
+  console.log('ℹ️  Will try same origin first:', sameOrigin);
+  return sameOrigin;
 };
 
 const API_URL = getApiUrl();
 
-console.log('Using API_URL:', API_URL);
+console.log('🌐 API Configuration loaded');
+console.log('📍 Hostname:', window.location.hostname);
+console.log('🔗 API URL:', API_URL);
 
 // Helper function để construct full URL
 function buildApiUrl(path) {
@@ -38,20 +51,33 @@ function buildApiUrl(path) {
   // Nếu path bắt đầu với /, remove nó
   const cleanPath = path.startsWith('/') ? path : '/' + path;
   
-  return API_URL + cleanPath;
+  const fullUrl = API_URL + cleanPath;
+  return fullUrl;
 }
 
-// Wrap fetch để tự động thêm API_URL
+// Wrap fetch để tự động thêm API_URL và logging
 const originalFetch = window.fetch;
 window.fetch = function(...args) {
   const [resource, config] = args;
   
-  // Nếu resource là relative path, thêm API URL
+  // Nếu resource là relative path liên quan API, thêm API URL
   if (typeof resource === 'string' && (resource.startsWith('/api') || resource.startsWith('api'))) {
-    args[0] = buildApiUrl(resource);
+    const fullUrl = buildApiUrl(resource);
+    console.log('📡 API Request:', resource, '→', fullUrl);
+    args[0] = fullUrl;
   }
   
-  return originalFetch.apply(this, args);
+  return originalFetch.apply(this, args)
+    .then(response => {
+      if (!response.ok) {
+        console.warn(`⚠️  API Response [${response.status}]:`, resource);
+      }
+      return response;
+    })
+    .catch(error => {
+      console.error('❌ API Fetch Error:', resource, error);
+      throw error;
+    });
 };
 
-console.log('✓ API Configuration loaded');
+console.log('✓ API wrapper loaded');

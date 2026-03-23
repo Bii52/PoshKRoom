@@ -4,12 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - Quản Lý Nhân Viên</title>
+    <script>
+        // Ngăn trang scroll khi load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                window.scrollTo(0, 0);
+            });
+        } else {
+            window.scrollTo(0, 0);
+        }
+        
+        // Prevent default scroll on anchor links
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' && e.target.href && !e.target.href.includes('#')) {
+                // Regular navigation - no scroll issue
+                return;
+            }
+        }, true);
+    </script>
     <script src="config.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: auto;
         }
 
         body {
