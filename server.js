@@ -6,6 +6,7 @@ const path = require('path');
 const crypto = require('crypto');
 const multer = require('multer');
 const mongoose = require('mongoose');
+const { generateTechnicianDetailHTML } = require('./templates/technicianDetailPage');
 require('dotenv').config();
 
 const app = express();
@@ -35,7 +36,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ 
+const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB
 });
@@ -124,7 +125,7 @@ async function initializeDatabases() {
           createdAt: new Date()
         }
       ];
-      
+
       await Technician.insertMany(sampleTechs);
       console.log(`✓ Tạo ${sampleTechs.length} kỹ thuật viên mẫu`);
     }
@@ -141,13 +142,13 @@ async function initializeDatabases() {
 app.post('/api/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    
+
     if (!username || !password) {
       return res.status(400).json({ error: 'Tên đăng nhập và mật khẩu không được để trống' });
     }
 
     const user = await User.findOne({ username, password });
-    
+
     if (!user) {
       return res.status(401).json({ error: 'Tên đăng nhập hoặc mật khẩu không đúng' });
     }
@@ -187,15 +188,15 @@ app.get('/api/technicians/name/:slug', async (req, res) => {
   try {
     const slug = req.params.slug;
     console.log(`📍 GET /api/technicians/name/${slug}`);
-    
+
     const technician = await Technician.findOne({ slug, status: true, deletedAt: { $exists: false } });
     console.log(`✓ Technician found by slug:`, technician ? technician.name : 'NOT FOUND');
-    
+
     if (!technician) {
       console.warn(`⚠️ Technician not found with slug: ${slug}`);
       return res.status(404).json({ error: 'Kỹ thuật viên không tồn tại' });
     }
-    
+
     res.json(technician);
   } catch (err) {
     console.error(`❌ Error loading technician by slug:`, err.message);
@@ -208,15 +209,15 @@ app.get('/api/technicians/:id', async (req, res) => {
   try {
     const id = req.params.id;
     console.log(`📍 GET /api/technicians/${id}`);
-    
+
     const technician = await Technician.findById(id);
     console.log(`✓ Technician found:`, technician ? technician.name : 'NOT FOUND');
-    
+
     if (!technician) {
       console.warn(`⚠️ Technician not found with ID: ${id}`);
       return res.status(404).json({ error: 'Kỹ thuật viên không tồn tại' });
     }
-    
+
     res.json(technician);
   } catch (err) {
     console.error(`❌ Error loading technician:`, err.message);
@@ -224,21 +225,35 @@ app.get('/api/technicians/:id', async (req, res) => {
   }
 });
 
-// Thêm kỹ thuật viên mới
+// Thêm kỹ thuật viên mới (nhân viên)
 app.post('/api/technicians', upload.any(), async (req, res) => {
   try {
     console.log(`📍 POST /api/technicians - Full req.body:`, JSON.stringify(req.body, null, 2));
-    
+
     const { name, shortDescription, description, slug, status } = req.body;
-    
-    if (!name || !slug) {
-      return res.status(400).json({ error: 'Tên và slug không được để trống' });
+
+    // Validate required fields
+    if (!name || !name.trim()) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Tên nhân viên không được để trống' 
+      });
+    }
+
+    if (!slug || !slug.trim()) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Slug (đường dẫn) không được để trống' 
+      });
     }
 
     // Check slug exists
-    const existingTech = await Technician.findOne({ slug });
+    const existingTech = await Technician.findOne({ slug: slug.trim().toLowerCase() });
     if (existingTech) {
-      return res.status(400).json({ error: 'Slug đã tồn tại' });
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Slug đã tồn tại. Vui lòng chọn slug khác' 
+      });
     }
 
     // Process files
@@ -250,8 +265,8 @@ app.post('/api/technicians', upload.any(), async (req, res) => {
     // Parse gallery from req.body
     if (req.body.gallery) {
       if (Array.isArray(req.body.gallery)) {
-        gallery = req.body.gallery.filter(url => url && url.length > 0);
-      } else if (typeof req.body.gallery === 'string') {
+        gallery = req.body.gallery.filter(url => url && String(url).trim().length > 0);
+      } else if (typeof req.body.gallery === 'string' && req.body.gallery.trim()) {
         gallery = [req.body.gallery];
       }
     }
@@ -275,33 +290,39 @@ app.post('/api/technicians', upload.any(), async (req, res) => {
 
     const newTechnician = new Technician({
       _id: generateId(),
-      name,
-      shortDescription: shortDescription || '',
-      description: description || '',
-      slug,
+      name: name.trim(),
+      shortDescription: shortDescription ? String(shortDescription).trim() : '',
+      description: description ? String(description).trim() : '',
+      slug: slug.trim().toLowerCase(),
       avatar: avatar || '/images/placeholder.jpg',
       cover: cover || '/images/placeholder.jpg',
       gallery: gallery && gallery.length > 0 ? gallery : [],
-      status: status === 'true' || status === true,
+      status: status === 'true' || status === true || status === 1,
       createdAt: new Date()
     });
 
     console.log(`📍 Creating technician with:`);
+    console.log(`   Name: ${newTechnician.name}`);
+    console.log(`   Slug: ${newTechnician.slug}`);
     console.log(`   Avatar: ${newTechnician.avatar}`);
     console.log(`   Cover: ${newTechnician.cover}`);
     console.log(`   Gallery count: ${newTechnician.gallery.length}`);
-    console.log(`   Gallery: ${JSON.stringify(newTechnician.gallery)}`);
 
     await newTechnician.save();
 
     res.json({
       success: true,
-      message: 'Thêm kỹ thuật viên thành công',
-      id: newTechnician._id
+      message: 'Thêm nhân viên thành công',
+      id: newTechnician._id,
+      data: newTechnician
     });
   } catch (err) {
     console.error('❌ Error creating technician:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ 
+      success: false, 
+      error: 'Lỗi khi thêm nhân viên', 
+      details: err.message 
+    });
   }
 });
 
@@ -323,21 +344,21 @@ app.put('/api/technicians/:id', upload.any(), async (req, res) => {
     }
 
     const files = req.files || [];
-    
+
     // Xử lý avatar
     let avatar = technician.avatar;  // Mặc định giữ avatar cũ
     if (bodyAvatar) {
       // Client gửi URL avatar cũ hoặc ảnh mới
       avatar = bodyAvatar;
     }
-    
+
     // Xử lý cover
     let cover = technician.cover;    // Mặc định giữ cover cũ
     if (bodyCover) {
       // Client gửi URL cover cũ hoặc ảnh mới
       cover = bodyCover;
     }
-    
+
     // Xử lý gallery - giữ gallery cũ hoặc dùng oldGallery từ client
     let gallery = oldGallery ? JSON.parse(oldGallery) : (technician.gallery || []);
     if (bodyGallery) {
@@ -435,262 +456,52 @@ app.delete('/api/technicians/:id/gallery/:image', async (req, res) => {
   }
 });
 
+// ============ STATIC PAGES ============
+
+// Route for etiquette page
+app.get('/etiquette', (req, res) => {
+  res.sendFile(path.join(__dirname, 'etiquette.html'));
+});
+
+// Route for profile page
+app.get('/profile', (req, res) => {
+  res.sendFile(path.join(__dirname, 'profile.html'));
+});
+
+// Route for admin pages
+app.get('/admin-login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin-login.html'));
+});
+
+app.get('/admin-dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin-dashboard.html'));
+});
+
+app.get('/admin-technician', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin-technician.html'));
+});
+
 // ============ DYNAMIC MODEL DETAIL PAGES ============
 
 // Route để hiển thị trang chi tiết model (e.g., /rosie-viet)
 app.get('/:slug', async (req, res, next) => {
   try {
     const slug = req.params.slug;
-    
+
     // Skip nếu là static files hoặc API routes
     if (slug.includes('.') || slug.startsWith('admin') || slug === 'api') {
       return next();
     }
-    
+
     // Tìm model theo slug
     const technician = await Technician.findOne({ slug, status: true, deletedAt: { $exists: false } });
-    
+
     if (!technician) {
       return next(); // Pass to next middleware (404)
     }
-    
-    // Render model detail page
-    const html = `
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${technician.name} - Posh K-Room</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f5f5f5;
-      color: #333;
-    }
-    
-    .detail-page {
-      width: 100%;
-    }
-    
-    /* Cover Hero Section */
-    .cover-section {
-      position: relative;
-      width: 100%;
-      height: 450px;
-      overflow: hidden;
-      background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3));
-    }
-    
-    .cover-section img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .cover-overlay {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(transparent, rgba(0,0,0,0.6));
-      padding: 40px 30px 30px;
-      color: white;
-    }
-    
-    .cover-overlay h1 {
-      font-size: 3em;
-      font-weight: 600;
-      margin: 0;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    }
-    
-    /* Info Section */
-    .info-section {
-      background: white;
-      padding: 40px 30px;
-      display: grid;
-      grid-template-columns: 200px 1fr;
-      gap: 40px;
-      align-items: start;
-      max-width: 1200px;
-      margin: -80px auto 0;
-      position: relative;
-      z-index: 10;
-      border-radius: 10px;
-      margin-left: 30px;
-      margin-right: 30px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-    }
-    
-    .avatar-box img {
-      width: 100%;
-      height: 280px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-    
-    .description-box h2 {
-      font-size: 1.8em;
-      margin-bottom: 10px;
-    }
-    
-    .description-box .status {
-      color: #999;
-      font-size: 0.95em;
-      margin-bottom: 20px;
-    }
-    
-    .description-box p {
-      color: #666;
-      line-height: 1.8;
-      font-size: 1em;
-      margin-bottom: 15px;
-    }
-    
-    /* Gallery Section */
-    .gallery-section {
-      background: white;
-      padding: 50px 30px;
-      margin-top: 40px;
-    }
-    
-    .gallery-section h2 {
-      font-size: 1.8em;
-      margin-bottom: 30px;
-      max-width: 1200px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 15px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    
-    .gallery-item {
-      position: relative;
-      overflow: hidden;
-      border-radius: 8px;
-      height: 280px;
-    }
-    
-    .gallery-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      cursor: pointer;
-      transition: transform 0.3s ease;
-    }
-    
-    .gallery-item:hover img {
-      transform: scale(1.05);
-    }
-    
-    /* Footer */
-    .footer-section {
-      background: #f5f5f5;
-      padding: 30px;
-      text-align: center;
-      margin-top: 40px;
-    }
-    
-    .btn-home {
-      display: inline-block;
-      padding: 12px 30px;
-      background: #333;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
-      transition: background 0.3s;
-      font-weight: 600;
-    }
-    
-    .btn-home:hover {
-      background: #555;
-    }
-    
-    /* Responsive */
-    @media (max-width: 768px) {
-      .cover-overlay h1 {
-        font-size: 2em;
-      }
-      
-      .info-section {
-        grid-template-columns: 1fr;
-        margin-left: 15px;
-        margin-right: 15px;
-        padding: 30px 20px;
-      }
-      
-      .avatar-box img {
-        height: 200px;
-      }
-      
-      .gallery-grid {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      }
-      
-      .gallery-item {
-        height: 200px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="detail-page">
-    <!-- Cover Section -->
-    <div class="cover-section">
-      <img src="${technician.cover || technician.avatar}" alt="${technician.name}" onerror="this.src='/images/placeholder.jpg'" />
-      <div class="cover-overlay">
-        <h1>${technician.name}</h1>
-      </div>
-    </div>
-    
-    <!-- Info Section -->
-    <div class="info-section">
-      <div class="avatar-box">
-        <img src="${technician.avatar}" alt="${technician.name}" onerror="this.src='/images/placeholder.jpg'" />
-      </div>
-      <div class="description-box">
-        <h2>${technician.name}</h2>
-        <p class="status">${technician.shortDescription || 'Kỹ thuật viên'}</p>
-        <p>${technician.description.replace(/\n/g, '<br>')}</p>
-      </div>
-    </div>
-    
-    <!-- Gallery Section -->
-    ${technician.gallery && technician.gallery.length > 0 ? `
-    <div class="gallery-section">
-      <h2>Bộ sưu tập</h2>
-      <div class="gallery-grid">
-        ${technician.gallery.map(img => `
-          <div class="gallery-item">
-            <img src="${img}" alt="${technician.name}" onerror="this.style.display='none'" />
-          </div>
-        `).join('')}
-      </div>
-    </div>
-    ` : ''}
-    
-    <!-- Footer -->
-    <div class="footer-section">
-      <a href="/" class="btn-home">← Quay lại trang chủ</a>
-    </div>
-  </div>
-</body>
-</html>
-    `;
-    
+
+    // Render model detail page sử dụng template
+    const html = generateTechnicianDetailHTML(technician);
     res.send(html);
   } catch (err) {
     console.error('Error loading model page:', err.message);
