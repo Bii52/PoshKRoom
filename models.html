@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Models - Poshkroom</title>
+    <script src="config.js"></script>
+    <link rel="icon" href="images/pfavico.ico" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: rgb(250, 250, 250);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #DDB967;
+            text-decoration: none;
+            font-family: 'Mr De Haviland', cursive;
+            letter-spacing: 1px;
+        }
+
+        .navbar-links {
+            display: flex;
+            gap: 25px;
+            list-style: none;
+        }
+
+        .navbar-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .navbar-links a:hover {
+            color: #DDB967;
+        }
+
+        /* Header Section */
+        .page-header {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.3) 100%), url('images/80b714_2af44b66b561484991a48bb832669bc0~mv2.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            padding: 120px 20px;
+            text-align: center;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .page-header h1 {
+            font-size: 77px;
+            margin-bottom: 20px;
+            font-family: 'mr de haviland', cursive;
+            color: #DDB967;
+            text-shadow: rgba(255, 255, 255, 0.6) 1px 1px 1px, rgba(0, 0, 0, 0.6) -1px -1px 1px;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            opacity: 0.95;
+            max-width: 600px;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+
+        /* Controls Section */
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 20px;
+            border: 2px solid #DDB967;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #b8935a;
+            box-shadow: 0 0 8px rgba(221, 185, 103, 0.2);
+        }
+
+        .filter-select {
+            padding: 12px 15px;
+            border: 2px solid #DDB967;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #b8935a;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #DDB967;
+            color: #000;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 2px solid #DDB967;
+        }
+
+        .back-btn:hover {
+            background: transparent;
+            color: #DDB967;
+        }
+
+        /* Models Grid */
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .model-card {
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            overflow: visible;
+            box-shadow: none;
+            transition: transform 0.3s;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .model-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .model-image-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 270 / 380;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin-bottom: 15px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .model-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .model-card:hover .model-image {
+            transform: scale(1.02);
+        }
+
+        .model-info {
+            padding: 0;
+        }
+
+        .model-name {
+            font-size: 23px;
+            font-weight: 700;
+            color: #DDB967;
+            margin-bottom: 5px;
+            font-family: 'mr de haviland', cursive;
+            text-shadow: rgba(255, 255, 255, 0.6) 1px 1px 1px, rgba(0, 0, 0, 0.6) -1px -1px 1px;
+            line-height: 1.4em;
+        }
+
+        .model-status {
+            display: block;
+            padding: 0;
+            background: transparent;
+            color: #DDB967;
+            border-radius: 0;
+            font-size: 23px;
+            font-weight: 700;
+            margin-bottom: 0;
+            text-shadow: rgba(255, 255, 255, 0.6) 1px 1px 1px, rgba(0, 0, 0, 0.6) -1px -1px 1px;
+        }
+
+        .model-description {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 0;
+            line-height: 1.5;
+            min-height: 0;
+            display: none;
+        }
+
+        .view-profile-btn {
+            display: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-state h3 {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #DDB967;
+        }
+
+        .spinner {
+            border: 4px solid rgba(221, 185, 103, 0.2);
+            border-top: 4px solid #DDB967;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .pagination button {
+            padding: 10px 15px;
+            border: 2px solid #DDB967;
+            background: white;
+            color: #DDB967;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .pagination button:hover,
+        .pagination button.active {
+            background: #DDB967;
+            color: #000;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-info {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        /* Footer */
+        .footer {
+            background: #000;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 80px;
+            border-top: 2px solid #DDB967;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-content p {
+            margin: 0;
+            font-size: 13px;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 42px;
+            }
+
+            .navbar-links {
+                gap: 15px;
+                font-size: 12px;
+            }
+
+            .models-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 20px;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .search-box,
+            .filter-select {
+                width: 100%;
+            }
+
+            .model-image-wrapper {
+                height: 220px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">Posh K-Room</a>
+            <ul class="navbar-links">
+                <li><a href="/">Trang Chủ</a></li>
+                <li><a href="/models">Models</a></li>
+                <li><a href="/etiquette">Quy Tắc</a></li>
+                <li><a href="#contact">Liên Hệ</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="page-header">
+        <h1>All Models</h1>
+        <p>Khám phá bộ sưu tập đầy đủ của các technician tuyệt vời</p>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div style="margin-bottom: 30px;">
+            <a href="/" class="back-btn">← Quay Lại Trang Chủ</a>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="searchBox" class="search-box" placeholder="Tìm kiếm model theo tên...">
+            <select id="statusFilter" class="filter-select">
+                <option value="">Tất Cả Trạng Thái</option>
+                <option value="active">Đang Hoạt Động</option>
+                <option value="inactive">Không Hoạt Động</option>
+            </select>
+        </div>
+
+        <div id="resultsInfo" class="results-info"></div>
+
+        <div id="modelsContainer" class="models-grid">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Đang tải dữ liệu...</p>
+            </div>
+        </div>
+
+        <div id="pagination" class="pagination"></div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 Posh K Room. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        let allModels = [];
+        let filteredModels = [];
+        const itemsPerPage = 12;
+        let currentPage = 1;
+
+        // Load models on page load
+        window.addEventListener('load', () => {
+            loadModels();
+            setupSearchAndFilter();
+        });
+
+        async function loadModels() {
+            try {
+                const response = await fetch(`${API_URL}/api/technicians`);
+                if (!response.ok) throw new Error('Lỗi tải danh sách');
+
+                allModels = await response.json();
+                filteredModels = [...allModels];
+                currentPage = 1;
+                renderModels();
+            } catch (err) {
+                console.error('Error loading models:', err);
+                document.getElementById('modelsContainer').innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <h3>Lỗi tải dữ liệu</h3>
+                        <p>${err.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function setupSearchAndFilter() {
+            document.getElementById('searchBox').addEventListener('input', filterModels);
+            document.getElementById('statusFilter').addEventListener('change', filterModels);
+        }
+
+        function filterModels() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            filteredModels = allModels.filter(model => {
+                const matchesSearch = !searchTerm || 
+                    model.name.toLowerCase().includes(searchTerm) ||
+                    model.slug.toLowerCase().includes(searchTerm) ||
+                    (model.shortDescription && model.shortDescription.toLowerCase().includes(searchTerm));
+
+                const matchesStatus = !statusFilter || 
+                    (statusFilter === 'active' && model.status) ||
+                    (statusFilter === 'inactive' && !model.status);
+
+                return matchesSearch && matchesStatus;
+            });
+
+            currentPage = 1;
+            renderModels();
+        }
+
+        function renderModels() {
+            const container = document.getElementById('modelsContainer');
+
+            if (filteredModels.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <h3>Không tìm thấy model nào</h3>
+                        <p>Vui lòng thử lại với từ khóa khác</p>
+                    </div>
+                `;
+                document.getElementById('pagination').innerHTML = '';
+                document.getElementById('resultsInfo').innerHTML = '';
+                return;
+            }
+
+            const startIdx = (currentPage - 1) * itemsPerPage;
+            const endIdx = startIdx + itemsPerPage;
+            const pageModels = filteredModels.slice(startIdx, endIdx);
+
+            container.innerHTML = pageModels.map(model => `
+                <div class="model-card">
+                    <div class="model-image-wrapper">
+                        <a href="/${model.slug}" target="_self">
+                            <img src="${model.cover || model.avatar || '/images/placeholder.jpg'}" 
+                                 alt="${model.name}" class="model-image"
+                                 onerror="this.src='/images/placeholder.jpg'">
+                        </a>
+                    </div>
+                    <div class="model-info">
+                        <div class="model-name">${escapeHtml(model.name)}</div>
+                        <div class="model-status">${escapeHtml(model.shortDescription || 'Available')}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Update results info
+            const totalResults = filteredModels.length;
+            const startNum = startIdx + 1;
+            const endNum = Math.min(endIdx, totalResults);
+            document.getElementById('resultsInfo').innerHTML = 
+                `Hiển thị ${startNum} - ${endNum} trong ${totalResults} models`;
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredModels.length / itemsPerPage);
+            const paginationDiv = document.getElementById('pagination');
+
+            if (totalPages <= 1) {
+                paginationDiv.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <button onclick="previousPage()" ${currentPage === 1 ? 'disabled' : ''}>← Trước</button>
+            `;
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    html += `<button onclick="goToPage(${i})" class="${currentPage === i ? 'active' : ''}">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    html += `<button disabled>...</button>`;
+                }
+            }
+
+            html += `
+                <button onclick="nextPage()" ${currentPage === totalPages ? 'disabled' : ''}>Sau →</button>
+            `;
+
+            paginationDiv.innerHTML = html;
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderModels();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(filteredModels.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderModels();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderModels();
+            window.scrollTo(0, 0);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+
+</html>

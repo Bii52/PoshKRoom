@@ -96,39 +96,8 @@ async function initializeDatabases() {
       console.log(`✓ Tài khoản admin được tạo: ${adminUser.username} / ${adminUser.password}`);
     }
 
-    // Create sample technicians if none exist
-    const technicianCount = await Technician.countDocuments();
-    if (technicianCount === 0) {
-      const sampleTechs = [
-        {
-          _id: generateId(),
-          name: 'Nguyễn Văn A',
-          slug: 'nguyen-van-a',
-          shortDescription: 'Chuyên gia sửa chữa điện tử',
-          description: 'Có 10 năm kinh nghiệm sửa chữa các thiết bị điện tử',
-          avatar: '/images/placeholder.jpg',
-          cover: '/images/placeholder.jpg',
-          gallery: [],
-          status: true,
-          createdAt: new Date()
-        },
-        {
-          _id: generateId(),
-          name: 'Trần Thị B',
-          slug: 'tran-thi-b',
-          shortDescription: 'Chuyên gia bảo trì hệ thống',
-          description: 'Chuyên bảo trì và nâng cấp hệ thống máy tính',
-          avatar: '/images/placeholder.jpg',
-          cover: '/images/placeholder.jpg',
-          gallery: [],
-          status: true,
-          createdAt: new Date()
-        }
-      ];
-
-      await Technician.insertMany(sampleTechs);
-      console.log(`✓ Tạo ${sampleTechs.length} kỹ thuật viên mẫu`);
-    }
+    // Technicians are now created by admin only - no default seeding
+    console.log('✓ Chế độ quản lý technician: Admin-only (không có seed mặc định)');
 
     console.log('✓ Database đã khởi tạo (MongoDB)');
     console.log(`✓ Database: ${MONGO_URL}`);
@@ -479,6 +448,14 @@ app.get('/admin-dashboard', (req, res) => {
 
 app.get('/admin-technician', (req, res) => {
   res.sendFile(path.join(__dirname, 'admin-technician.html'));
+});
+
+app.get('/admin-models', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin-models.html'));
+});
+
+app.get('/models', (req, res) => {
+  res.sendFile(path.join(__dirname, 'models.html'));
 });
 
 // ============ DYNAMIC MODEL DETAIL PAGES ============
