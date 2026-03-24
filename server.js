@@ -113,18 +113,18 @@ app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
-      return res.status(400).json({ error: 'Tên đăng nhập và mật khẩu không được để trống' });
+      return res.status(400).json({ error: 'Username and password cannot be empty' });
     }
 
     const user = await User.findOne({ username, password });
 
     if (!user) {
-      return res.status(401).json({ error: 'Tên đăng nhập hoặc mật khẩu không đúng' });
+      return res.status(401).json({ error: 'Username or password is incorrect' });
     }
 
     res.json({
       success: true,
-      message: 'Đăng nhập thành công',
+      message: 'Login successful',
       user: {
         username: user.username,
         role: user.role
@@ -205,14 +205,14 @@ app.post('/api/technicians', upload.any(), async (req, res) => {
     if (!name || !name.trim()) {
       return res.status(400).json({ 
         success: false, 
-        error: 'Tên nhân viên không được để trống' 
+        error: 'Staff name cannot be empty' 
       });
     }
 
     if (!slug || !slug.trim()) {
       return res.status(400).json({ 
         success: false, 
-        error: 'Slug (đường dẫn) không được để trống' 
+        error: 'Slug (URL path) cannot be empty' 
       });
     }
 

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Kỹ Thuật Viên - Admin</title>
+    <title>Technician Management - Admin</title>
     <script>
         // Ngăn trang scroll khi load
         if (document.readyState === 'loading') {
@@ -599,15 +599,15 @@
 
 <body>
     <div class="navbar">
-        <h1>Poshkroom Admin Dashboard</h1>
+        <h1>Vietroom</h1>
         <div>
             <a href="/admin-dashboard.html" style="opacity: 0.8; color: white; text-decoration: none; margin: 0 15px; font-size: 14px;">Dashboard</a>
-            <a href="/admin-technician.html" style="opacity: 1; font-weight: bold; color: white; text-decoration: none; margin: 0 15px; font-size: 14px;">Kỹ Thuật Viên</a>
-            <a href="/admin-models.html" style="opacity: 0.8; color: white; text-decoration: none; margin: 0 15px; font-size: 14px;">Quản Lý Models</a>
+            <a href="/admin-technician.html" style="opacity: 1; font-weight: bold; color: white; text-decoration: none; margin: 0 15px; font-size: 14px;">Technicians</a>
+            <a href="/admin-models.html" style="opacity: 0.8; color: white; text-decoration: none; margin: 0 15px; font-size: 14px;">Manage Models</a>
         </div>
         <div class="user-info">
             <span id="username">User</span>
-            <button class="logout-btn" onclick="logout()">Đăng Xuất</button>
+            <button class="logout-btn" onclick="logout()">Log out</button>
         </div>
     </div>
 
@@ -615,98 +615,98 @@
         <div id="alertBox" class="alert"></div>
 
         <div class="header">
-            <h2>Quản Lý Kỹ Thuật Viên</h2>
-            <button class="add-btn" onclick="openAddModal()">+ Thêm Kỹ Thuật Viên</button>
+            <h2>Technician Management</h2>
+            <button class="add-btn" onclick="openAddModal()">+ Add Technician</button>
         </div>
 
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>Ảnh</th>
-                        <th>Tên</th>
-                        <th>Mô Tả Ngắn</th>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Short Description</th>
                         <th>Link (Slug)</th>
-                        <th>Trạng Thái</th>
-                        <th>Hành Động</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="technicianTable">
                     <tr class="empty-state">
-                        <td colspan="6">Đang tải dữ liệu...</td>
+                        <td colspan="6">Loading data...</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Modal Thêm/Sửa Kỹ Thuật Viên -->
+    <!-- Modal Add/Edit Technician -->
     <div id="technicianModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header" id="modalTitle">Thêm Kỹ Thuật Viên Mới</div>
+            <div class="modal-header" id="modalTitle">Add New Technician</div>
             <form id="technicianForm" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label for="techName">Tên Kỹ Thuật Viên: <span style="color: red;">*</span></label>
+                    <label for="techName">Technician Name: <span style="color: red;">*</span></label>
                     <input type="text" id="techName" required>
                 </div>
 
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="techSlug">Link ID (Slug): <span style="color: red;">*</span></label>
-                        <input type="text" id="techSlug" placeholder="vd: nguyen-van-a" required>
+                        <input type="text" id="techSlug" placeholder="e.g.: john-doe" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="techStatus">Trạng Thái:</label>
+                        <label for="techStatus">Status:</label>
                         <div class="checkbox-group">
                             <input type="checkbox" id="techStatus" checked>
-                            <label for="techStatus" style="margin-bottom: 0;">Hiển thị</label>
+                            <label for="techStatus" style="margin-bottom: 0;">Show</label>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-group full">
-                    <label for="techShortDesc">Mô Tả Ngắn (1 dòng):</label>
-                    <input type="text" id="techShortDesc" placeholder="Mô tả ngắn gọn về kỹ thuật viên">
+                    <label for="techShortDesc">Short Description (1 line):</label>
+                    <input type="text" id="techShortDesc" placeholder="Brief description of the technician">
                 </div>
 
                 <div class="form-group full">
-                    <label for="techDesc">Mô Tả Chi Tiết:</label>
-                    <textarea id="techDesc" placeholder="Mô tả chi tiết..."></textarea>
+                    <label for="techDesc">Detailed Description:</label>
+                    <textarea id="techDesc" placeholder="Detailed description..."></textarea>
                 </div>
 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>Ảnh Đại Diện:</label>
+                        <label>Avatar:</label>
                         <div class="file-input-wrapper">
                             <input type="file" id="techAvatar" accept="image/*">
-                            <label class="file-input-label" for="techAvatar">Chọn ảnh đại diện</label>
+                            <label class="file-input-label" for="techAvatar">Select Avatar</label>
                         </div>
                         <div id="avatarPreview"></div>
                     </div>
 
                     <div class="form-group">
-                        <label>Ảnh Bìa (Cover):</label>
+                        <label>Cover Image:</label>
                         <div class="file-input-wrapper">
                             <input type="file" id="techCover" accept="image/*">
-                            <label class="file-input-label" for="techCover">Chọn ảnh bìa</label>
+                            <label class="file-input-label" for="techCover">Select Cover Image</label>
                         </div>
                         <div id="coverPreview"></div>
                     </div>
                 </div>
 
                 <div class="form-group full">
-                    <label>Gallery (Nhiều Ảnh):</label>
+                    <label>Gallery (Multiple Images):</label>
                     <div class="file-input-wrapper">
                         <input type="file" id="techGallery" multiple accept="image/*">
-                        <label class="file-input-label" for="techGallery">Chọn hoặc kéo thả ảnh</label>
+                        <label class="file-input-label" for="techGallery">Select or drag & drop images</label>
                     </div>
                     <div class="gallery-preview" id="galleryPreview"></div>
                 </div>
 
                 <div class="modal-buttons">
-                    <button type="button" class="btn-cancel" onclick="closeModal()">Hủy</button>
-                    <button type="submit" class="btn-save">Lưu</button>
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-save">Save</button>
                 </div>
             </form>
         </div>
@@ -715,38 +715,38 @@
     <!-- Modal Xem Chi Tiết Kỹ Thuật Viên -->
     <div id="viewModal" class="modal profile-view-modal">
         <div class="modal-content">
-            <div class="modal-header">Chi Tiết Kỹ Thuật Viên</div>
+            <div class="modal-header">Technician Details</div>
 
             <div class="profile-header">
                 <img id="viewAvatar" src="" alt="Avatar" class="profile-avatar"
                     onerror="this.src='/images/placeholder.jpg'">
                 <div class="profile-info">
-                    <h2 id="viewName">Tên</h2>
+                    <h2 id="viewName">Name</h2>
                     <p><strong>Link (Slug):</strong> <span id="viewSlug">-</span></p>
-                    <p><strong>Mô tả ngắn:</strong> <span id="viewShortDesc">-</span></p>
-                    <span class="profile-badge" id="viewStatusBadge">Hiển thị</span>
+                    <p><strong>Short Description:</strong> <span id="viewShortDesc">-</span></p>
+                    <span class="profile-badge" id="viewStatusBadge">Show</span>
                 </div>
             </div>
 
             <div class="profile-section">
-                <h4>Ảnh Bìa</h4>
+                <h4>Cover Image</h4>
                 <img id="viewCover" src="" alt="Cover"
                     style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 5px;"
                     onerror="this.src='/images/placeholder.jpg'">
             </div>
 
             <div class="profile-section">
-                <h4>Mô Tả Chi Tiết</h4>
+                <h4>Detailed Description</h4>
                 <p id="viewDesc" style="line-height: 1.6; color: #666;">-</p>
             </div>
 
             <div class="profile-section">
-                <h4 id="galleryTitle">Album Ảnh</h4>
+                <h4 id="galleryTitle">Image Gallery</h4>
                 <div class="profile-gallery" id="viewGallery"></div>
             </div>
 
             <div class="modal-buttons">
-                <button type="button" class="btn-cancel" onclick="closeViewModal()">Đóng</button>
+                <button type="button" class="btn-cancel" onclick="closeViewModal()">Close</button>
             </div>
         </div>
     </div>
@@ -813,7 +813,7 @@
             formData.append('status', document.getElementById('techStatus').checked);
             formData.append('oldGallery', JSON.stringify(currentGallery));
 
-            // Add files - nếu không có file mới thì gửi URL cũ
+            // Add files - if no new file, send old URL
             const avatar = document.getElementById('techAvatar').files[0];
             if (avatar) {
                 formData.append('avatar', avatar);
@@ -883,20 +883,20 @@
                         <td><code>${tech.slug}</code></td>
                         <td>
                             <span class="status-badge ${tech.status && !tech.deletedAt ? 'active' : 'inactive'}">
-                                ${tech.status && !tech.deletedAt ? 'Hiển thị' : 'Ẩn'}
+                                ${tech.status && !tech.deletedAt ? 'Show' : 'Hide'}
                             </span>
                         </td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn btn-view" onclick="openViewModal('${tech._id}')">Xem</button>
-                                <button class="btn btn-edit" onclick="openEditModal('${tech._id}')">Sửa</button>
-                                <button class="btn btn-delete" onclick="deleteTechnician('${tech._id}')">Xóa</button>
+                                <button class="btn btn-view" onclick="openViewModal('${tech._id}')">View</button>
+                                <button class="btn btn-edit" onclick="openEditModal('${tech._id}')">Edit</button>
+                                <button class="btn btn-delete" onclick="deleteTechnician('${tech._id}')">Delete</button>
                             </div>
                         </td>
                     </tr>
                 `).join('');
             } catch (err) {
-                showAlert('Lỗi tải danh sách: ' + err.message, 'error');
+                showAlert('Error loading list: ' + err.message, 'error');
             }
         }
 
@@ -906,7 +906,7 @@
             currentGallery = [];
             currentAvatar = null;   // Reset avatar cũ
             currentCover = null;    // Reset cover cũ
-            document.getElementById('modalTitle').textContent = 'Thêm Kỹ Thuật Viên Mới';
+            document.getElementById('modalTitle').textContent = 'Add New Technician';
             document.getElementById('technicianForm').reset();
             document.getElementById('techStatus').checked = true;
             document.getElementById('avatarPreview').innerHTML = '';
@@ -919,7 +919,7 @@
         async function openEditModal(id) {
             try {
                 if (!id) {
-                    showAlert('Lỗi: ID kỹ thuật viên không hợp lệ', 'error');
+                    showAlert('Error: Invalid technician ID', 'error');
                     return;
                 }
 
@@ -945,7 +945,7 @@
                 currentAvatar = tech.avatar || null;  // Lưu avatar cũ
                 currentCover = tech.cover || null;    // Lưu cover cũ
 
-                document.getElementById('modalTitle').textContent = 'Sửa Kỹ Thuật Viên';
+                document.getElementById('modalTitle').textContent = 'Edit Technician';
                 document.getElementById('techName').value = tech.name || '';
                 document.getElementById('techSlug').value = tech.slug || '';
                 document.getElementById('techShortDesc').value = tech.shortDescription || '';
@@ -1075,7 +1075,7 @@
 
         // Delete technician
         async function deleteTechnician(id) {
-            if (!confirm('Bạn chắc chắn muốn xóa kỹ thuật viên này?')) return;
+            if (!confirm('Are you sure you want to delete this technician?')) return;
 
             try {
                 const response = await fetch(`/api/technicians/${id}`, {

@@ -1,5 +1,5 @@
 /**
- * POSH K-ROOM - Navigation & Scroll Functionality
+ * Vietroom - Navigation & Scroll Functionality
  * Handles smooth scrolling and active link highlighting
  */
 

@@ -1,5 +1,5 @@
 /**
- * POSH K-ROOM Model Scraper
+ * Vietroom Model Scraper
  * 
  * Script tự động lấy dữ liệu model từ poshkroom.com
  * và thêm vào database MongoDB thông qua API

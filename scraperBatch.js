@@ -1,5 +1,5 @@
 /**
- * POSH K-ROOM Batch Scraper
+ * Vietroom Batch Scraper
  * 
  * Scrape nhiều models cùng lúc từ danh sách
  * 
@@ -37,7 +37,7 @@ const logger = {
 // ============ BATCH SCRAPER ============
 
 async function scrapeBatch(modelSlugs, concurrency = 2) {
-  logger.header('🚀 POSH K-ROOM Batch Scraper');
+  logger.header('🚀 Vietroom Batch Scraper');
   
   const results = {
     success: [],

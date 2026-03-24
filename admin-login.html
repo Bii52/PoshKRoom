@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng Nhập Admin - Poshkroom</title>
+    <title>Admin Login - Poshkroom</title>
     <script src="config.js"></script>
     <style>
         * {
@@ -143,16 +143,16 @@
 
         <form id="loginForm">
             <div class="form-group">
-                <label for="username">Tên Đăng Nhập:</label>
-                <input type="text" id="username" name="username" placeholder="Nhập tên đăng nhập" required>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" placeholder="Enter username" required>
             </div>
 
             <div class="form-group">
-                <label for="password">Mật Khẩu:</label>
-                <input type="password" id="password" name="password" placeholder="Nhập mật khẩu" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" placeholder="Enter password" required>
             </div>
 
-            <button type="submit" class="login-btn">Đăng Nhập</button>
+            <button type="submit" class="login-btn">Login</button>
         </form>
 
         <div class="demo-info">
@@ -184,7 +184,7 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    showAlert('Đăng nhập thành công! Đang chuyển hướng...', 'success');
+                    showAlert('Login successful! Redirecting...', 'success');
                     localStorage.setItem('user', JSON.stringify(data.user));
                     setTimeout(() => {
                         window.location.href = '/admin-technician.html';
@@ -193,7 +193,7 @@
                     showAlert(data.error, 'error');
                 }
             } catch (err) {
-                showAlert('Lỗi kết nối server: ' + err.message, 'error');
+                showAlert('Server connection error: ' + err.message, 'error');
             }
         });
 
